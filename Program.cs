@@ -54,7 +54,7 @@ namespace Ludo
 
                     if (p1_hely >= palya)
                     {
-                        Console.WriteLine(p1_nev + (p1_babu - 1) + " bábuja van");
+                        Console.WriteLine(p1_nev + (p1_babu-1) + " bábuja van");
                         p1_hely = 0;
                     }
                     if (p2_hely >= palya)
@@ -72,22 +72,22 @@ namespace Ludo
                         Console.WriteLine(p4_nev + (p4_babu - 1) + " bábuja van");
                         p4_hely = 0;
                     }
-                    if (p1_hely >= palya)
+                    if (p1_hely == 0)
                     {
                         Console.WriteLine(p1_nev + " nyert!");
                         Restart();
                     }
-                    else if (p2_hely >= palya)
+                    else if (p2_hely == 0)
                     {
                         Console.WriteLine(p2_nev + " nyert!");
                         Restart();
                     }
-                    else if (p3_hely >= palya)
+                    else if (p3_hely == 0)
                     {
                         Console.WriteLine(p3_nev + " nyert!");
                         Restart();
                     }
-                    else if (p4_hely >= palya)
+                    else if (p4_hely == 0)
                     {
                         Console.WriteLine(p4_nev + " nyert!");
                         Restart();
