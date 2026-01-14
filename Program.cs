@@ -12,18 +12,6 @@ namespace Ludo
     {
         Random rnd = new Random();
         const int palya = 52;
-        int p1_hely = 0;
-        int p2_hely = 0;
-        int p3_hely = 0;
-        int p4_hely = 0;
-        int p1_babu = 4;
-        int p2_babu = 4;
-        int p3_babu = 4;
-        int p4_babu = 4;
-        string p1_nev = "";
-        string p2_nev = "p2";
-        string p3_nev = "p3";
-        string p4_nev = "p4";
         public Program()
         {
 
@@ -91,71 +79,40 @@ namespace Ludo
                 else
                     Console.WriteLine("Ez a név már foglalt");
             }
-               
-            
 
 
-             while (p1_babu != 0 || p2_babu != 0 || p3_babu != 0 || p4_babu != 0)
-             {
-                while (p1_hely < palya && p2_hely < palya && p3_hely < palya && p4_hely < palya)
+            for (int idx = 0; idx < players.Count; idx++)
+            {
+                Player p = players[idx];
+                while (p.Pieces != 0)
                 {
-                    int dobas1 = rnd.Next(1, 7);
-                    int dobas2 = rnd.Next(1, 7);
-                    int dobas3 = rnd.Next(1, 7);
-                    int dobas4 = rnd.Next(1, 7);
-                    p1_hely += dobas1;
-                    p2_hely += dobas2;
-                    p2_hely += dobas3;
-                    p2_hely += dobas4;
+                    while (p.Position < palya)
+                    {
+                        int dobas = rnd.Next(1, 7);
+                        
+                        p.Position += dobas;
 
-                    Console.WriteLine($"{p1_nev} {dobas1} -est dobott, így {p1_hely} -re lépett");
+                        Console.WriteLine($"{p.Name} {dobas} -est dobott, így {p.Position} -re lépett");
 
-                    if (p1_hely >= palya)
-                    {
-                        Console.WriteLine(p1_nev + (p1_babu - 1) + " bábuja van");
-                        p1_hely = 0;
-                    }
-                    else if (p2_hely >= palya)
-                    {
-                        Console.WriteLine(p2_nev + (p2_babu - 1) + " bábuja van");
-                        p2_hely = 0;
-                    }
-                    else if (p3_hely >= palya)
-                    {
-                        Console.WriteLine(p3_nev + (p3_babu - 1) + " bábuja van");
-                        p3_hely = 0;
-                    }
-                    else if (p4_hely >= palya)
-                    {
-                        Console.WriteLine(p4_nev + (p4_babu - 1) + " bábuja van");
-                        p4_hely = 0;
-                    }
+                        if (p.Position >= palya)
+                        {
+                            Console.WriteLine(p.Name + (p.Pieces - 1) + " bábuja van");
+                            p.Pieces -= 1;
+                            p.Position = 0;
+                        }
+                        
                     
-                }
-                if (p1_babu == 0)
-                {
-                    Console.WriteLine(p1_nev + " nyert!");
-                    Restart();
-                }
-                else if (p2_babu == 0)
-                {
-                    Console.WriteLine(p2_nev + " nyert!");
-                    Restart();
-                }
-                else if (p3_babu == 0)
-                {
-                    Console.WriteLine(p3_nev + " nyert!");
-                    Restart();
-                }
-                else if (p4_babu == 0)
-                {
-                    Console.WriteLine(p4_nev + " nyert!");
-                    Restart();
-                }
-                else
-                {
-                    Console.WriteLine();
-                    Console.ReadKey(intercept: true);
+                    }
+                    if (p.Pieces == 0)
+                    {
+                        Console.WriteLine(p.Name + " nyert!");
+                        Restart();
+                    }
+                    else
+                    {
+                        Console.WriteLine();
+                        Console.ReadKey(intercept: true);
+                    }
                 }
             }
         }
