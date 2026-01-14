@@ -24,62 +24,29 @@ namespace Ludo
 
         public void Jatek()
         {
-            Console.Write("Add meg az első játékos nevét: ");
-            /*
-
-            p1_nev = Console.ReadLine();
-            while (p1_nev == null)
-                Console.WriteLine("Nem adtál meg nevet, próbáld újra: ");
-            */
-            int jatekos_szam = 0;
             List<Player> players = new List<Player>();
-            while (jatekos_szam < 1 && jatekos_szam > 4)
-            {
-                Console.Write("Mennyi játékossal szertnél játszani? ");
-                int.TryParse(Console.ReadLine(), out jatekos_szam);
-                /*if (int.TryParse(Console.ReadLine(), out int numPlayers) && numPlayers >= 2 && numPlayers <= 4)
-                {
-                    for (int i = 0; i < numPlayers; i++)
-                    {
-                        Console.Write("Add meg a játékos nevét: ");
-                        string name = Console.ReadLine();
-                        if (!string.IsNullOrWhiteSpace(name) && !players.Any(p => p.Name == name))
-                        {
-                            players.Add(new Player(name, 0, 4));
-                        }
-                        else
-                        {
-                            Console.WriteLine("Érvénytelen vagy foglalt név, próbáld újra.");
-                            i--; // Ismételje meg a ciklust a név újragenerálásához
-                        }
-                    }
-                    break; // Kilép a ciklusból, ha sikeresen hozzáadtuk a játékosokat
-                }
-                else
-                {
-                    Console.WriteLine("Kérlek adj meg egy érvényes számot 2 és 4 között.");
-                }*/
-            }
+            Console.Write("Mennyi játékossal szertnél játszani? ");
+            int.TryParse(Console.ReadLine(), out int playerCount);
 
-            for (int i = 0; i < jatekos_szam ; i++)
+            for (int i = 0; i < playerCount; i++)
             {
                 Console.Write("Add meg a játékos nevét: ");
-                string? name = Console.ReadLine();
+                string name = Console.ReadLine();
                 if (name != players[i].Name)
                 {
                     if (!string.IsNullOrWhiteSpace(name))
                     {
                         players.Add(new Player(name, 0, 4));
                     }
-                    else
-                    {
-                        Console.WriteLine("Nem adtál meg nevet, próbáld újra.");
-                    }
-                }
                 else
-                    Console.WriteLine("Ez a név már foglalt");
-            }
-
+                {
+                    Console.WriteLine("Nem adtál meg nevet, próbáld újra.");
+                    i--;
+                }
+    }
+    else
+        Console.WriteLine("Ez a név már foglalt"); i--;
+}
 
             for (int idx = 0; idx < players.Count; idx++)
             {
@@ -131,4 +98,5 @@ namespace Ludo
             Console.ReadKey();
         }
     }
+
 }
