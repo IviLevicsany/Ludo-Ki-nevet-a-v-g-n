@@ -38,15 +38,15 @@ namespace Ludo
                     {
                         players.Add(new Player(name, 0, 4));
                     }
-                else
-                {
-                    Console.WriteLine("Nem adtál meg nevet, próbáld újra.");
-                    i--;
+                    else
+                    {
+                        Console.WriteLine("Nem adtál meg nevet, próbáld újra.");
+                        i--;
+                    }
                 }
-    }
-    else
-        Console.WriteLine("Ez a név már foglalt"); i--;
-}
+                else
+                    Console.WriteLine("Ez a név már foglalt"); i--;
+            }
 
             for (int idx = 0; idx < players.Count; idx++)
             {
@@ -100,3 +100,4 @@ namespace Ludo
     }
 
 }
+
