@@ -20,8 +20,8 @@ namespace Ludo
         {
             Console.WriteLine("Köszöntünk a a ludo (vagy hazai fordításban a ki nevet a végén) nevű konzolos játékunkban");
             Console.WriteLine("Készítette: Levi, Norbi, Szabi");
-        }
-
+            Console.Write("Add meg az első játékos nevét: ");
+        }   
         public void Jatek()
         {
             List<Player> players = new List<Player>();
@@ -56,7 +56,7 @@ namespace Ludo
                     while (p.Position < palya)
                     {
                         int dobas = rnd.Next(1, 7);
-                        
+
                         p.Position += dobas;
 
                         Console.WriteLine($"{p.Name} {dobas} -est dobott, így {p.Position} -re lépett");
@@ -67,8 +67,8 @@ namespace Ludo
                             p.Pieces -= 1;
                             p.Position = 0;
                         }
-                        
-                    
+
+
                     }
                     if (p.Pieces == 0)
                     {
@@ -86,8 +86,7 @@ namespace Ludo
         public void Restart()
         {
             Console.WriteLine("Nyomd meg az 'i' gombot ha újra szertnéd kezdeni");
-            ConsoleKeyInfo gomb = Console.ReadKey(intercept: true);
-            if (gomb.Key == ConsoleKey.I)
+            if (Console.ReadLine().ToLower() == "i")
             {
                 Jatek();
             }
@@ -98,6 +97,4 @@ namespace Ludo
             Console.ReadKey();
         }
     }
-
 }
-
