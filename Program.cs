@@ -57,17 +57,34 @@ namespace Ludo
                     {
                         int dobas = rnd.Next(1, 7);
 
-                        p.Position += dobas;
-
-                        Console.WriteLine($"{p.Name} {dobas} -est dobott, így {p.Position} -re lépett");
-
-                        if (p.Position >= palya)
-                        {
-                            Console.WriteLine(p.Name + (p.Pieces - 1) + " bábuja van");
-                            p.Pieces -= 1;
-                            p.Position = 0;
-                        }
-
+                         bool hatvan = false;
+                         if (hatvan is false)
+                         {
+                        
+                             if (dobas != 6)
+                             {
+                        
+                                 Console.WriteLine($"{p.Name} még nem mehet ki mivel {dobas} dobot");
+                             }
+                             if (dobas == 6)
+                             {
+                        
+                                 Console.WriteLine($"{p.Name} 6-ost dobot ki mehet");
+                                 
+                             }
+                         }
+                         if (hatvan is true)
+                         {
+                             Console.WriteLine($"{p.Name} {dobas} -est dobott, így {p.Position} -re lépett");
+                             p.Position += dobas;
+                         }
+                        
+                         if (p.Position >= palya)
+                         {
+                             Console.WriteLine(p.Name + (p.Pieces - 1) + " bábuja van");
+                             p.Pieces -= 1;
+                             p.Position = 0;
+                         }
 
                     }
                     if (p.Pieces == 0)
@@ -122,3 +139,4 @@ namespace Ludo
         }
     }
 }
+
