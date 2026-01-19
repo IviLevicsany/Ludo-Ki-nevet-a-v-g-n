@@ -1,179 +1,227 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-record struct Player(string? Name, int Position, int Pieces);
-
-namespace Ludo
+class Program
 {
-    internal class Program
+    static Random rnd = new Random();
+
+    static char[,] baseBoard =
     {
-        Random rnd = new Random();
-        const int palya = 52;
-        public Program()
-        {
-            
-        }
-        public void Bevezető()
-        {
-            Console.WriteLine("Köszöntünk a a ludo (vagy hazai fordításban a ki nevet a végén) nevű konzolos játékunkban");
-            Console.WriteLine("Készítette: Levi, Norbi, Szabi");
-            Console.Write("Add meg az első játékos nevét: ");
-        }   
-        public void Jatek()
-        {
-            List<Player> players = new List<Player>();
-            Console.Write("Mennyi játékossal szertnél játszani? ");
-            int.TryParse(Console.ReadLine(), out int playerCount);
+        {'G','G','G','G','G','G','.','.','.','Y','Y','Y','Y','Y','Y'},
+        {'G','G','G','G','G','G','.','H','.','Y','Y','Y','Y','Y','Y'},
+        {'G','G','G','G','G','G','.','H','.','Y','Y','Y','Y','Y','Y'},
+        {'G','G','G','G','G','G','.','H','.','Y','Y','Y','Y','Y','Y'},
+        {'G','G','G','G','G','G','.','H','.','Y','Y','Y','Y','Y','Y'},
+        {'G','G','G','G','G','G','.','H','.','Y','Y','Y','Y','Y','Y'},
+        {'.','.','.','.','.','.','H','H','H','.','.','.','.','.','.'},
+        {'.','H','H','H','H','H','H','H','H','H','H','H','H','H','.'},
+        {'.','.','.','.','.','.','H','H','H','.','.','.','.','.','.'},
+        {'R','R','R','R','R','R','.','H','.','B','B','B','B','B','B'},
+        {'R','R','R','R','R','R','.','H','.','B','B','B','B','B','B'},
+        {'R','R','R','R','R','R','.','H','.','B','B','B','B','B','B'},
+        {'R','R','R','R','R','R','.','H','.','B','B','B','B','B','B'},
+        {'R','R','R','R','R','R','.','H','.','B','B','B','B','B','B'},
+        {'R','R','R','R','R','R','.','.','.','B','B','B','B','B','B'},
+    };
 
-            for (int i = 0; i < playerCount; i++)
+    static List<(int x, int y)> mainPath = new()
+    {
+        (0,6),(1,6),(2,6),(3,6),(4,6),(5,6),
+        (6,5),(6,4),(6,3),(6,2),(6,1),(6,0),(7,0),
+        (8,0),(8,1),(8,2),(8,3),(8,4),(8,5),
+        (9,6),(10,6),(11,6),(12,6),(13,6),(14,6),(14,7),
+        (14,8),(13,8),(12,8),(11,8),(10,8),(9,8),
+        (8,9),(8,10),(8,11),(8,12),(8,13),(8,14),(7,14),
+        (6,14),(6,13),(6,12),(6,11),(6,10),(6,9),
+        (5,8),(4,8),(3,8),(2,8),(1,8),(0,8),(0,7),
+    };
+
+    static Dictionary<char, List<(int x, int y)>> homePaths = new()
+    {
+        ['G'] = new() { (1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (6, 7) },
+        ['Y'] = new() { (7, 1), (7, 2), (7, 3), (7, 4), (7, 5), (7, 6) },
+        ['B'] = new() { (13, 7), (12, 7), (11, 7), (10, 7), (9, 7), (8, 7) },
+        ['R'] = new() { (7, 13), (7, 12), (7, 11), (7, 10), (7, 9), (7, 8) }
+    };
+    
+
+    static Dictionary<char, int> startPosition = new()
+    {
+        ['G'] = 1,
+        ['Y'] = 14,
+        ['B'] = 27,
+        ['R'] = 40
+    };
+
+    class Player
+    {
+        public char Color;
+        public List<Pawn> Pawns = new();
+    }
+
+    class Pawn
+    {
+        public int MainPosition = -1;
+        public int GoalPosition = -1;
+        public bool Finished = false;
+    }
+
+    static void Main()
+    {
+        var players = new List<Player>
+        {
+            CreatePlayer('G'),
+            CreatePlayer('Y'),
+            CreatePlayer('B'),
+            CreatePlayer('R')
+        };
+
+        int current = 0;
+
+        while (true)
+        {
+            Draw(players);
+            var p = players[current];
+
+            int roll = rnd.Next(1, 7);
+            Console.WriteLine($"\n{p.Color} játékos {roll}-t dobott (ENTER)");
+            Console.ReadLine();
+
+            Move(p, players, roll);
+
+            if (p.Pawns.All(x => x.Finished))
             {
-                Console.Write("Add meg a játékos nevét: ");
-                string name = Console.ReadLine();
-                if (name != players[i].Name)
+                Draw(players);
+                Console.WriteLine($"\n{p.Color} Nyert!");
+                break;
+            }
+
+            if (roll != 6)
+                current = (current + 1) % players.Count;
+        }
+    }
+
+    static Player CreatePlayer(char c)
+    {
+        var p = new Player { Color = c };
+        for (int i = 0; i < 4; i++) p.Pawns.Add(new Pawn());
+        return p;
+    }
+
+    static void Move(Player p, List<Player> players, int roll)
+    {
+        var newPawn = p.Pawns.FirstOrDefault(i => i.MainPosition == -1 && !i.Finished);
+        var activePawn = p.Pawns.FirstOrDefault(i => (i.MainPosition >= 0 || i.GoalPosition >= 0) && !i.Finished);
+
+        if (roll == 6 && newPawn != null && activePawn == null)
+        {
+            newPawn.MainPosition = startPosition[p.Color];
+            return;
+        }
+        else if (roll == 6 && newPawn != null && activePawn != null)
+        {
+            Console.Write("Szeretnél új bábut a pályára hozni? (I/N): ");
+            if (Console.ReadKey().Key == ConsoleKey.I)
+            {
+                newPawn.MainPosition = startPosition[p.Color];
+                return;
+            }
+            Console.WriteLine();
+        }
+        if (activePawn == null) return;
+
+        int entryIndex = (startPosition[p.Color] + mainPath.Count - 1) % mainPath.Count;
+
+        if (activePawn.MainPosition >= 0)
+        {
+            int target = activePawn.MainPosition + roll;
+
+            if (activePawn.MainPosition <= entryIndex && target > entryIndex)
+            {
+                int stepsIntoHome = target - entryIndex - 1;
+
+                if (stepsIntoHome < homePaths[p.Color].Count)
                 {
-                    if (!string.IsNullOrWhiteSpace(name))
-                    {
-                        players.Add(new Player(name, 0, 4));
-                    }
-                    else
-                    {
-                        Console.WriteLine("Nem adtál meg nevet, próbáld újra.");
-                        i--;
-                    }
+                    activePawn.MainPosition = -1;
+                    activePawn.GoalPosition = 0;
+                    for (int i = 1; i <= stepsIntoHome; i++)
+                        activePawn.GoalPosition++;
+                    return;
                 }
-                else
-                    Console.WriteLine("Ez a név már foglalt"); i--;
+                else return;
             }
 
-            for (int idx = 0; idx < players.Count; idx++)
+            activePawn.MainPosition = target % mainPath.Count;
+        }
+        else if (activePawn.GoalPosition >= 0)
+        {
+            int remaining = homePaths[p.Color].Count - 1 - activePawn.GoalPosition;
+
+            if (roll == remaining)
             {
-                Player p = players[idx];
-                while (p.Pieces != 0)
+                activePawn.Finished = true;
+                activePawn.GoalPosition = -1;
+            }
+            else if (roll < remaining)
+            {
+                activePawn.GoalPosition += roll;
+            }
+            else
+            {
+                Console.WriteLine($"Túl nagy dobás, a bábu nem lép.");
+            }
+        }
+
+        foreach (var other in players.Where(pl => pl != p))
+            foreach (var pawn in other.Pawns)
+                if (pawn.MainPosition == activePawn.MainPosition && pawn.MainPosition >= 0)
+                    pawn.MainPosition = -1;
+    }
+
+    static void Draw(List<Player> players)
+    {
+        Console.Clear();
+        char[,] board = (char[,])baseBoard.Clone();
+
+        foreach (var p in players)
+            foreach (var pawn in p.Pawns)
+            {
+                if (pawn.MainPosition >= 0)
                 {
-                    while (p.Position < palya)
-                    {
-                        int dobas = rnd.Next(1, 7);
-
-                        bool hatvan = false;
-                        if (hatvan is false)
-                        {
-
-                            if (dobas != 6)
-                            {
-
-                                Console.WriteLine($"{p.Name} még nem mehet ki mivel {dobas} dobot");
-                            }
-                            if (dobas == 6)
-                            {
-
-                                Console.WriteLine($"{p.Name} 6-ost dobot ki mehet");
-
-                            }
-                        }
-                        if (hatvan is true)
-                        {
-                            Console.WriteLine($"{p.Name} {dobas} -est dobott, így {p.Position} -re lépett");
-                            p.Position += dobas;
-                        }
-
-                        if (p.Position >= palya)
-                        {
-                            Console.WriteLine(p.Name + (p.Pieces - 1) + " bábuja van");
-                            p.Pieces -= 1;
-                            p.Position = 0;
-                        }
-
-                    }
-                    if (p.Pieces == 0)
-                    {
-                        Console.WriteLine(p.Name + " nyert!");
-                        Restart();
-                    }
-                    else
-                    {
-                        Console.WriteLine();
-                        Console.ReadKey(intercept: true);
-                    }
+                    var pos = mainPath[pawn.MainPosition];
+                    board[pos.y, pos.x] = p.Color;
                 }
-            }
-        }
-
-        public void Palya()
-        {
-            char[,] board =
-            {
-                {'G','G','G','G','G','G','.','.','.','Y','Y','Y','Y','Y','Y'},
-                {'G','G','G','G','G','G','.','.','.','Y','Y','Y','Y','Y','Y'},
-                {'G','G','G','G','G','G','.','.','.','Y','Y','Y','Y','Y','Y'},
-                {'G','G','G','G','G','G','.','.','.','Y','Y','Y','Y','Y','Y'},
-                {'G','G','G','G','G','G','.','.','.','Y','Y','Y','Y','Y','Y'},
-                {'G','G','G','G','G','G','.','.','.','Y','Y','Y','Y','Y','Y'},
-                {'.','.','.','.','.','.','F','F','F','.','.','.','.','.','.'},
-                {'.','.','.','.','.','.','F','F','F','.','.','.','.','.','.'},
-                {'.','.','.','.','.','.','F','F','F','.','.','.','.','.','.'},
-                {'R','R','R','R','R','R','.','.','.','B','B','B','B','B','B'},
-                {'R','R','R','R','R','R','.','.','.','B','B','B','B','B','B'},
-                {'R','R','R','R','R','R','.','.','.','B','B','B','B','B','B'},
-                {'R','R','R','R','R','R','.','.','.','B','B','B','B','B','B'},
-                {'R','R','R','R','R','R','.','.','.','B','B','B','B','B','B'},
-                {'R','R','R','R','R','R','.','.','.','B','B','B','B','B','B'},
-            };
-            
-            DrawBoard(board);
-
-            static void DrawBoard(char[,] board)
-            {
-                for (int i = 0; i < board.GetLength(0); i++)
+                else if (pawn.GoalPosition >= 0)
                 {
-                    for (int j = 0; j < board.GetLength(1); j++)
-                    {
-                        Console.Write(board[i, j] + " ");
-                    }
-                    Console.WriteLine();
+                    var pos = homePaths[p.Color][pawn.GoalPosition];
+                    board[pos.y, pos.x] = p.Color;
                 }
             }
-        }
-        public void Path()
-        {
-            List<(int x, int y)> mainPath = new List<(int x, int y)>
-            {
-                (0, 6), (1, 6), (2, 6), (3, 6), (4, 6), (5, 6),
-                //befejezni
-                (5, 6), (5, 8), (5, 9), (5, 10), (5, 11), (5, 12),
-                (6, 12), (7, 12), (8, 12), (9, 12), (10, 12), (11, 12),
-                (11, 11), (11, 10), (11, 9), (11, 8), (11, 7), (11, 6),
-                (10, 6), (9, 6), (8, 6), (7, 6), (6, 6),
-                (6, 5), (6, 4), (6, 3), (6, 2), (6, 1), (6, 0),
-                (7, 0), (8, 0), (9, 0), (10, 0), (11, 0), (12, 0),
-                (12, 1), (12, 2), (12, 3), (12, 4), (12, 5), (12, 6),
-                (13, 6), (14, 6), (15, 6),
-            };
-            for (int i = 1; i < 6; i++)
-            {
-                path.Add((i, 6));
-            }
-            for (int i = 6; i < 11; i++)
-            {
-                path.Add((6, i));
-            }
 
+        for (int y = 0; y < 15; y++)
+        {
+            for (int x = 0; x < 15; x++)
+            {
+                char c = board[y, x];
+                Console.ForegroundColor = c switch
+                {
+                    'G' => ConsoleColor.Green,
+                    'Y' => ConsoleColor.Yellow,
+                    'B' => ConsoleColor.Blue,
+                    'R' => ConsoleColor.Red,
+                    'H' => ConsoleColor.Gray,
+                    '.' => ConsoleColor.DarkGray,
+                };
+                Console.Write(c);
+                Console.ResetColor();
+            }
+            Console.WriteLine();
         }
 
-        public void Restart()
-        {
-            Console.WriteLine("Nyomd meg az 'i' gombot ha újra szertnéd kezdeni");
-            if (Console.ReadLine().ToLower() == "i")
-            {
-                Jatek();
-            }
-        }
-        static void Main(string[] args)
-        {
-            new Program();
-            Console.ReadKey();
-        }
+        Console.WriteLine("\nCélba ért bábuk:");
+        foreach (var p in players)
+            Console.Write($"{p.Color}: {p.Pawns.Count(i => i.Finished)} / 4   ");
+        Console.WriteLine();
     }
 }
